@@ -1,0 +1,83 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS
+Thumbs.db
+desktop.ini
+~$*
+*.tmp
+
+# Raw data folders — local only (GB-scale)
+02_실험_데이터/
+03_매뉴얼_및_참고자료/
+99_상관없는_자료_및_기타/
+셀 엑셀파일/
+모듈엑셀파일/
+모듈,셀 엑셀파일_by_고병찬,이중선/
+
+# Bulk document folders inside 01_분석보고서_및_사양/
+01_분석보고서_및_사양/PPt 파일/
+01_분석보고서_및_사양/모듈 및 셀 열화분석 정리본★★★★★/
+01_분석보고서_및_사양/셀 실험 정리본/
+
+# Binary file types (anywhere)
+*.pptx
+*.ppt
+*.pdf
+*.xlsx
+*.xls
+*.xlsm
+*.mat
+*.zip
+*.rar
+*.7z
+*.iso
+*.parquet
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.onnx
+*.bin
+*.dll
+*.exe
+
+# Run outputs
+outputs/runs/
+outputs/figures/
+
+# Old root-level files (already migrated to algo/ and ui/)
+data_io.py
+ocv_soc.py
+data_analysis_ui.py
+requirements.txt
+.claude/
+.codex_pydeps/
+
+# IDE
+.vscode/
+.idea/
+
+# Locks
+.locks/
+
+# Whitelist (force-include even if matched above)
+!outputs/ocv_soc/
+!outputs/ocv_soc/*.csv
+!outputs/ocv_soc/*.png
+!outputs/ocv_soc/*.md
+!outputs/ecm/
+!outputs/ecm/*.json
+!outputs/catalog*.csv
+!outputs/catalog*.md
+!outputs/recon*.md
+!outputs/handoff*.md
+!outputs/figures/.gitkeep
+!outputs/runs/.gitkeep
+!.gitkeep
