@@ -96,3 +96,10 @@ node_modules/
 
 # Stage 1 code-only push overrides earlier Stage 0 output whitelists.
 outputs/
+
+# Paper-specific drafts (live on their respective paper branches only)
+01_분석보고서_및_사양/K1_paper_draft/
+01_분석보고서_및_사양/K2_paper_draft/
+01_분석보고서_및_사양/S1_paper_draft/
+01_분석보고서_및_사양/S2_paper_draft/
+01_분석보고서_및_사양/S3_paper_draft/
