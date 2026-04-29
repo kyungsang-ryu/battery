@@ -55,6 +55,32 @@ def _select_segments(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.D
     )
 
 
+def _segment_quality(
+    pre_rest: pd.DataFrame,
+    pulse: pd.DataFrame,
+    post_rest: pd.DataFrame,
+    min_pulse_samples: int = 4,
+    min_recovery_samples: int = 4,
+) -> dict:
+    pulse_rows = pulse[np.abs(pulse["current"]) > 1e-6].copy()
+    if pulse.empty:
+        recovery_rows = post_rest.copy()
+    else:
+        recovery_rows = post_rest[post_rest["time_s"] > float(pulse["time_s"].iloc[-1])].copy()
+    quality_flag = "ok"
+    if len(pulse_rows) < min_pulse_samples or len(recovery_rows) < min_recovery_samples:
+        quality_flag = "insufficient_dynamic_samples"
+    return {
+        "pre_rest_samples": int(len(pre_rest)),
+        "pulse_samples": int(len(pulse)),
+        "pulse_nonzero_samples": int(len(pulse_rows)),
+        "post_rest_samples": int(len(post_rest)),
+        "recovery_samples": int(len(recovery_rows)),
+        "sufficient_dynamic_samples": quality_flag == "ok",
+        "fit_quality_flag": quality_flag,
+    }
+
+
 def _fit_recovery(rest_df: pd.DataFrame, current_a: float, t_origin: float) -> tuple[float, float]:
     if len(rest_df) < 4:
         return 0.0, float("nan")
@@ -85,6 +111,7 @@ def identify_1rc(file_path: str | Path, nominal_capacity_ah: float = 63.0) -> di
     """Estimate a 1-RC ECM from a DCIR pulse file."""
     df = read_cycler_file(str(file_path))
     pre_rest, pulse, post_rest = _select_segments(df)
+    quality = _segment_quality(pre_rest, pulse, post_rest)
 
     pulse_rows = pulse[np.abs(pulse["current"]) > 1e-6].copy()
     if pulse_rows.empty:
@@ -138,6 +165,7 @@ def identify_1rc(file_path: str | Path, nominal_capacity_ah: float = 63.0) -> di
         "C1": float(c1) if np.isfinite(c1) else None,
         "rmse_V": rmse_v,
         "meta": {
+            **quality,
             "file_path": str(Path(file_path).resolve()),
             "nominal_capacity_ah": float(nominal_capacity_ah),
             "pre_rest_step": int(pre_rest["step"].iloc[0]),
@@ -155,29 +183,10 @@ def identify_1rc(file_path: str | Path, nominal_capacity_ah: float = 63.0) -> di
 
 
 def identify_2rc(file_path: str | Path, nominal_capacity_ah: float = 63.0) -> dict:
-    """Provide a conservative 2-RC-shaped placeholder based on the 1-RC fit."""
-    base = identify_1rc(file_path, nominal_capacity_ah=nominal_capacity_ah)
-    tau_s = base["meta"].get("tau_s") or 0.0
-    r1 = float(base.get("R1") or 0.0)
-    r_fast = r1 * 0.7
-    r_slow = r1 * 0.3
-    tau_fast = tau_s * 0.4 if tau_s else None
-    tau_slow = tau_s * 2.0 if tau_s else None
-    c1 = float(tau_fast / r_fast) if tau_fast and r_fast > 0 else None
-    c2 = float(tau_slow / r_slow) if tau_slow and r_slow > 0 else None
-    return {
-        "model": "2RC",
-        "R0": base["R0"],
-        "R1": float(r_fast),
-        "C1": c1,
-        "R2": float(r_slow),
-        "C2": c2,
-        "rmse_V": base["rmse_V"],
-        "meta": {
-            **base["meta"],
-            "note": "initial placeholder derived from the 1-RC fit; refine in a later task",
-        },
-    }
+    """Estimate a 2-RC ECM while preserving the Stage 0 public import path."""
+    from algo.ecm.ecm_2rc import identify_2rc as _identify_2rc
+
+    return _identify_2rc(file_path, nominal_capacity_ah=nominal_capacity_ah)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

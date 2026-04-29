@@ -59,6 +59,8 @@ data_analysis_ui.py
 requirements.txt
 .claude/
 .codex_pydeps/
+.codex_*/
+pytest-cache-files-*/
 
 # IDE
 .vscode/
@@ -66,6 +68,16 @@ requirements.txt
 
 # Locks
 .locks/
+
+# Stage 1 code-only GitHub push
+outputs/
+node_modules/
+01_분석보고서_및_사양/K1_paper_draft/K1_paper_draft.docx
+01_분석보고서_및_사양/K1_paper_draft/K1_paper_draft.hwp
+01_분석보고서_및_사양/K1_paper_draft/node_modules/
+01_분석보고서_및_사양/K1_paper_draft/package.json
+01_분석보고서_및_사양/K1_paper_draft/package-lock.json
+*.MAT
 
 # Whitelist (force-include even if matched above)
 !outputs/ocv_soc/
@@ -81,3 +93,6 @@ requirements.txt
 !outputs/figures/.gitkeep
 !outputs/runs/.gitkeep
 !.gitkeep
+
+# Stage 1 code-only push overrides earlier Stage 0 output whitelists.
+outputs/

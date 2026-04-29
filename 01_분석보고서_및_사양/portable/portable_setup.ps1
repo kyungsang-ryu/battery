@@ -20,7 +20,7 @@
 #   - 02_실험_데이터\, 셀 엑셀파일\, 모듈엑셀파일\ 등 raw 데이터 폴더
 #   - 01_분석보고서_및_사양\PPt 파일\, 모듈 및 셀 열화분석 정리본★★★★★\, 셀 실험 정리본\
 #   - *.pptx, *.pdf, *.xlsx, *.mat, *.zip 등 큰 바이너리
-#   - .venv\, __pycache__\, .git\, .pytest_cache\, .codex_pydeps\, .claude\
+#   - .venv\, __pycache__\, .git\, .pytest_cache\, .codex_*\, node_modules\, .claude\
 
 param(
     [string]$Destination = "D:\battery_portable",
@@ -77,6 +77,10 @@ $excludeDirNames = @(
     ".claude",
     ".vscode",
     ".idea",
+    "node_modules",
+    ".codex_*",
+    "pytest-cache-files-*",
+    "*.egg-info",
     "runs",
     "figures"
 )
@@ -169,6 +173,14 @@ if ($IncludeData -ne "none") {
     }
 
     Write-Host "[data] raw data copy complete"
+}
+
+# Keep the guide easy to find from the portable folder root.
+$readmeSource = Join-Path $Source "01_분석보고서_및_사양\portable\portable_README.md"
+$readmeDestination = Join-Path $Destination "portable_README.md"
+if (Test-Path $readmeSource) {
+    Copy-Item -LiteralPath $readmeSource -Destination $readmeDestination -Force
+    Write-Host "[copy] portable_README.md copied to destination root"
 }
 
 # Show summary

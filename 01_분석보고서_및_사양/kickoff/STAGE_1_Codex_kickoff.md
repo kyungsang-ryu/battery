@@ -100,7 +100,8 @@ K1.8 unit tests
   2. [공개 API 영향]: identify_fractional, identify_2rc 신규 + 시그니처 명시
   3. [pytest 결과]: tests/algo 마지막 5줄
   4. [Antigravity에 알릴 것]: K1 결과를 시각화하려면 어느 파일/함수 사용
-- git push 는 하지 말 것. 사용자가 push_workspace.ps1 로 일괄 push.
+- KCI1 브랜치를 origin/KCI1 로 push: git push -u origin KCI1
+- main 브랜치는 손대지 말 것 (Antigravity 영역). KCI1 결과가 main 에 필요하면 PR 또는 사용자 merge 결정 후.
 
 지금 K1.1 부터 시작하라.
 

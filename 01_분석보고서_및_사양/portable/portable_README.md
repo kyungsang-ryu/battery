@@ -1,27 +1,43 @@
 # 집에서 작업 이어가기 — Portable Workspace 가이드
 
-본 폴더(`battery_portable\`) 는 회사 PC 의 워크스페이스에서 **코드·문서·작은 outputs·환경 설정만** 복사한 portable 버전. **raw 데이터(GB 단위)는 포함되지 않음**. 집에서도 이걸로 검토·전략·문서 작업·일부 코드 수정 가능. 본격 알고리즘 실행은 raw 데이터 처리 전략에 따라 다름 (아래 §3 참조).
+본 폴더(`battery_portable\`) 는 회사 PC 의 워크스페이스에서 **코드·문서·작은 outputs·환경 설정만** 복사한 portable 버전. **raw 데이터(GB 단위)는 포함되지 않음** (단 `--include-data core` 옵션 사용 시 본 논문 핵심 raw 까지 함께). 집에서도 이걸로 검토·전략·문서 작업·일부 코드 수정 가능.
+
+⚠ **PowerShell 5.1 한국어 인코딩 버그 회피 — Python 스크립트 사용 권장**: PowerShell `.ps1` 버전 (`portable_setup.ps1`) 은 한국어 폴더명 파싱 문제로 실패. **`portable_setup.py` (Python)** 사용 권장.
 
 ---
 
-## 1. 회사 PC 에서 portable 폴더 만들기 (한 번만)
+## 1. 회사 PC 에서 portable 폴더 만들기 (Python 권장)
 
-PowerShell 에서:
+PowerShell 또는 cmd 에서 먼저 Python 명령 확인:
+
+```powershell
+python --version
+```
+
+`python` 이 안 잡히면 Python 3.12 설치 후 다시 진행. 설치되어 있는데 `python` 대신 Windows launcher 만 잡히는 PC 에서는 아래 명령의 `python` 을 `py -3.12` 로 바꿔서 실행.
+
+그다음 portable 생성:
 
 ```powershell
 cd "D:\유경상\JGRC\시뮬레이션 파일\매틀랩 파일\battery\data\01_분석보고서_및_사양\portable"
-.\portable_setup.ps1
+python portable_setup.py --include-data core
 ```
 
-→ 기본 위치 `D:\battery_portable\` 에 생성. USB 드라이브로 직접 만들고 싶으면:
+→ 기본 위치 `D:\battery_portable\` 에 생성. **본 논문 핵심 raw 데이터까지 포함 (1~3 GB)**.
 
+USB 직접:
 ```powershell
-.\portable_setup.ps1 -Destination "E:\battery_portable"
+python portable_setup.py --destination "E:\battery_portable" --include-data core
 ```
 
-(`E:\` 는 USB 드라이브 letter)
+다른 옵션:
+- `--include-data none` → 코드·문서만 (~50 MB)
+- `--include-data core` → + 본 논문 핵심 raw (1~3 GB) ← **권장**
+- `--include-data all`  → + 옛날 데이터 모두 (5~10 GB+)
 
-스크립트가 robocopy 로 raw 데이터·.venv·.git·큰 바이너리 다 제외하고 작업 파일만 복사. 1~2분 안에 끝나고, 마지막에 폴더별 파일 수 + 총 사이즈 (보통 50MB 이내) 보고.
+Python 이 robocopy 를 호출하면서 한국어 폴더명·인코딩을 안전하게 처리. 5~15분 (raw 데이터 양에 따라). 끝나면 폴더별 파일 수 + 사이즈 요약 출력. 생성된 폴더 루트에도 `portable_README.md` 가 복사되어 바로 열어볼 수 있음.
+
+(PowerShell `.ps1` 버전도 같은 폴더에 있으나 PS 5.1 인코딩 버그로 실패할 수 있어서 비권장. Python 사용.)
 
 ---
 
@@ -62,14 +78,14 @@ pytest 통과 + Streamlit 메인 페이지 보이면 OK.
 
 ---
 
-## 3. raw 데이터 처리 — 스크립트 옵션 + 수동 옵션
+## 3. raw 데이터 처리 — Python 옵션 + 수동 옵션
 
-집에서 진짜로 알고리즘을 돌리려면 raw 데이터 (`02_실험_데이터\`, `셀 엑셀파일\`, `모듈엑셀파일\`) 도 함께 옮겨야 해. `portable_setup.ps1` 의 `-IncludeData` 옵션으로 자동 처리 가능.
+집에서 진짜로 알고리즘을 돌리려면 raw 데이터 (`02_실험_데이터\`, `셀 엑셀파일\`, `모듈엑셀파일\`) 도 함께 옮겨야 해. `portable_setup.py` 의 `--include-data` 옵션으로 자동 처리 가능.
 
 ### 옵션 1 — 코드·문서만 (default, ~50MB)
 
 ```powershell
-.\portable_setup.ps1
+python portable_setup.py --include-data none
 ```
 
 집에서 검토·문서 작업·메시지 작성 등 두뇌 작업 위주 시. Streamlit 은 placeholder 만 표시.
@@ -77,7 +93,7 @@ pytest 통과 + Streamlit 메인 페이지 보이면 OK.
 ### 옵션 2 — 본 논문 핵심 raw 데이터까지 (권장, ~1~3 GB)
 
 ```powershell
-.\portable_setup.ps1 -IncludeData core
+python portable_setup.py --include-data core
 ```
 
 복사되는 raw 데이터:
@@ -90,7 +106,7 @@ pytest 통과 + Streamlit 메인 페이지 보이면 OK.
 ### 옵션 3 — 옛날 데이터 포함 모두 (~5~10 GB+)
 
 ```powershell
-.\portable_setup.ps1 -IncludeData all
+python portable_setup.py --include-data all
 ```
 
 옵션 2 + 옛날 데이터 (`18650_SOH/`, `Cell 데이터★★★★★/`, `최근셀데이터/`, `모듈내 셀간 전압편차 경향확인/`, `모듈 CH2`, `모듈,셀 엑셀파일_*/`, `03_매뉴얼/`, `99_상관없는/`).
@@ -100,14 +116,14 @@ pytest 통과 + Streamlit 메인 페이지 보이면 OK.
 ### USB 직접 만들기
 
 ```powershell
-.\portable_setup.ps1 -Destination "E:\battery_portable" -IncludeData core
+python portable_setup.py --destination "E:\battery_portable" --include-data core
 ```
 
 (USB 드라이브 letter 가 E: 라고 가정)
 
 ### 클라우드 sync 대안
 
-옵션 1 (코드만) 으로 portable 만든 뒤, raw 데이터는 OneDrive / Google Drive / Dropbox 로 별도 sync. 집 PC 에서 같은 클라우드 클라이언트 설치해두면 portable 폴더와 같은 상대 경로에 데이터가 자동 동기화. 장기·다인용에 유리.
+`--include-data none` 으로 portable 만든 뒤, raw 데이터는 OneDrive / Google Drive / Dropbox 로 별도 sync. 집 PC 에서 같은 클라우드 클라이언트 설치해두면 portable 폴더와 같은 상대 경로에 데이터가 자동 동기화. 장기·다인용에 유리.
 
 ---
 
@@ -151,9 +167,10 @@ git push origin main          # 집에서 push 한 변경 보내기
 
 | 증상 | 원인 | 해결 |
 |---|---|---|
+| `python` 명령이 안 잡힘 | Python 이 PATH 에 없거나 미설치 | Python 3.12 설치 후 `python --version` 확인. 또는 `py -3.12 portable_setup.py ...` 사용 |
 | `pip install` 시 numpy/torch 빌드 실패 | Python 3.13/3.14 사용 중 | Python 3.12 로 다시 |
 | streamlit 한국어 깨짐 | OS locale 문제 | PowerShell 에 `$env:PYTHONUTF8 = "1"` |
-| algo.loaders.kier 가 raw 데이터 못 찾음 | 데이터 경로 다름 | 옵션 B 또는 C 로 raw 데이터 같은 상대 경로에 두기 |
+| algo.loaders.kier 가 raw 데이터 못 찾음 | 데이터 경로 다름 | `--include-data core` 또는 `all` 로 raw 데이터 같은 상대 경로에 두기 |
 | git pull conflict | 회사·집에서 같은 파일 수정 | 평범한 git merge resolution |
 
 ---

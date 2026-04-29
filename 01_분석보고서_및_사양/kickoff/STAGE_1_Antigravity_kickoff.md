@@ -76,7 +76,7 @@ A7. streamlit smoke test
 - 알고리즘 로직 (분수계 식, 식별 회귀) 을 UI 에 작성 금지
 - pickle 사용 금지
 - pyproject.toml 변경 시 사용자 승인
-- git push 는 하지 말 것. 사용자가 별도 push_workspace.ps1 로 일괄 push.
+- main 브랜치에 commit + push: git push origin main (UI 변경은 main 에서 직접 OK).
 
 [Codex 와의 의존 관계]
 - Codex 의 K1.5~K1.7 결과가 outputs/runs/K1-*/ 에 있어야 A3, A4 의 "View K1 results" 모드가 진짜 데이터를 보여줌
