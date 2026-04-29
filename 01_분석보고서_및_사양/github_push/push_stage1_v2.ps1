@@ -95,15 +95,17 @@ Write-Host "  --- staged files (first 60) ---" -ForegroundColor Yellow
 git diff --cached --name-status | Select-Object -First 60
 Write-Host "  --------------------------------"
 
-# Quick sanity: outputs/ must not be in the staged list
-$staged = git diff --cached --name-only
-$outputsStaged = $staged | Where-Object { $_ -like "outputs/*" }
-if ($outputsStaged) {
-    Write-Host "  WARNING: outputs/ files are still staged. Aborting before commit." -ForegroundColor Red
-    Write-Host $outputsStaged
+# Quick sanity: outputs/ must NOT be staged as Added (A) or Modified (M).
+# Deleted (D) entries are OK and expected — they come from `git rm --cached outputs/`
+# which is intentional untracking of previously-tracked Stage 0 outputs.
+$stagedAddOrMod = git diff --cached --name-only --diff-filter=AM
+$outputsBad = $stagedAddOrMod | Where-Object { $_ -like "outputs/*" }
+if ($outputsBad) {
+    Write-Host "  WARNING: outputs/ files staged as Added/Modified. Aborting." -ForegroundColor Red
+    Write-Host $outputsBad
     exit 1
 } else {
-    Write-Host "  Verified: no outputs/ files in staging area." -ForegroundColor Green
+    Write-Host "  Verified: outputs/ has no Added/Modified entries (Deleted entries are OK)." -ForegroundColor Green
 }
 
 # --- 4/6 Commit and push main --------------------------------------------
